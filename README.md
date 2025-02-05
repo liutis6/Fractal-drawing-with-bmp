@@ -19,4 +19,4 @@ Lots of comments as this is all new to me.
 
 ## Pattern to replicate:
 Inline-style: 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+![alt text](https://github.com/liutis6/Pattern-drawing-in-bmp/pattern.png "pattern")
