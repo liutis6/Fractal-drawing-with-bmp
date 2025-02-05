@@ -19,4 +19,4 @@ Lots of comments as this is all new to me.
 
 ## Pattern to replicate:
 Inline-style: 
-![alt text](https://github.com/liutis6/Pattern-drawing-in-bmp/pattern.png "pattern")
+![pattern](pattern.png "pattern")
