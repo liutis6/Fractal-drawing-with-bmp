@@ -1,9 +1,6 @@
 def __init__():
-    image = BMP(height = 100, width = 100)
-    image.change_one_pixel(x = 25, y = 30)
-    image.horizontal_line(y = 56)
-    image.vertical_line(x = 80)
-    image.diagonal_line(x_start = 30)
+    image = BMP(400, 400)
+    image.draw_pattern(50, 100, 350, 100, 1)  # Starting point and size
     image.generate_image("output.bmp")
 
 
@@ -62,23 +59,24 @@ class BMP:
             self.pixel_data += b'\x00' * self.row_padding # ficticious bytes to fill meet padding requirement
         
     # change one pixel
-    def change_one_pixel(self, x, y):
-        pixel_offset = (self.height-1-y) * self.row_size+x*3
-        self.pixel_data[pixel_offset:pixel_offset+3] = bytearray([0, 255, 0])
+    def set_pixel(self, x, y, color):
+        if 0 <= x < self.width and 0 <= y < self.height:
+            index = (self.height - 1 - y) * self.row_size + x * 3
+            self.pixel_data[index:index+3] = bytearray(color)
 
     # draw vertical line
-    def vertical_line(self, x):
-        for y in range(self.height):
+    def vertical_line(self, x, y1, y2):
+        for y in range(y1, y2):
             pixel_offset = (y * self.row_size + # skip over traversed rows
                             + x*3) # starting byte index in column
             self.pixel_data[pixel_offset:pixel_offset+3] = bytearray([0, 0, 255])
 
     # draw horizontal line
-    def horizontal_line(self, y):
+    def horizontal_line(self, y, x1, x2):
         pixel_offset = (y*self.row_size)
-        for x in range(self.width):
+        for x in range(x1, x2):
             self.pixel_data[pixel_offset+x*3:pixel_offset+x*3+3] = bytearray([0, 0, 255])
-
+    
     # draw diagonal line
     def diagonal_line(self, x_start):
         if(x_start>=0):
@@ -94,6 +92,12 @@ class BMP:
                 self.pixel_data[pixel_offset:pixel_offset+3] = bytearray([0, 0, 255])
                 x+=1
     
+    def draw_pattern(self, x1, y1, x2, y2, depth):
+        self.horizontal_line(self, y1, y2)
+
+
+        
+
     def generate_image(self, f_name):
         with open(f_name, "wb") as file: # wb - write in binary mode
             file.write(self.bmp_header) 
