@@ -66,14 +66,11 @@ class BMP:
 			self.pixel_data[pixel_offset:pixel_offset+3] = bytearray([0, 0, 255])
 
 	# draw horizontal line
-	def horizontal_line(self, y, x1, x2, depth):
-		if depth >= 0:
-			pixel_offset = (y * self.row_size)
-			for x in (range(x1, x2) if x1 < x2 else range(x2, x1)):
-				self.pixel_data[pixel_offset+x*3:pixel_offset+x*3+3] = bytearray([0, 0, 255])
-		else:
-			return
-	
+	def horizontal_line(self, y, x1, x2):
+		pixel_offset = (y * self.row_size)
+		for x in (range(x1, x2) if x1 < x2 else range(x2, x1)):
+			self.pixel_data[pixel_offset+x*3:pixel_offset+x*3+3] = bytearray([0, 0, 255])
+
 	# draw diagonal line
 	def diagonal_line(self, x_start):
 		if(x_start>=0):
@@ -90,67 +87,51 @@ class BMP:
 				x+=1
 	
 	# i - section in the fractal
-	def draw(self, i, y1, y2, x1, x2, depth):
-		if depth<=0:
-			return
-		
-		self.draw(1, y1, y2, x1, x2, depth-1)
-		
-		
-		
-		
-		
-		
-		
+	def get_instruction(self, n, instr, type):
+		if (n<=0):
+			instr.append(type)
+		else:
+			if(type=='right'):
+				self.get_instruction(n-1, instr, 'right')
+				self.get_instruction(n-1, instr, 'up')
+				self.get_instruction(n-1, instr, 'right')
+				self.get_instruction(n-1, instr, 'down')
+				self.get_instruction(n-1, instr, 'down')
+				self.get_instruction(n-1, instr, 'right')
+				self.get_instruction(n-1, instr, 'up')
+				self.get_instruction(n-1, instr, 'right')
+			elif (type=='up'):
+				self.get_instruction(n-1, instr, 'up')
+				self.get_instruction(n-1, instr, 'left')
+				self.get_instruction(n-1, instr, 'up')
+				self.get_instruction(n-1, instr, 'right')
+				self.get_instruction(n-1, instr, 'right')
+				self.get_instruction(n-1, instr, 'up')
+				self.get_instruction(n-1, instr, 'left')
+				self.get_instruction(n-1, instr, 'up')
+			elif (type=='down'):
+				self.get_instruction(n-1, instr, 'down')
+				self.get_instruction(n-1, instr, 'right')
+				self.get_instruction(n-1, instr, 'down')
+				self.get_instruction(n-1, instr, 'left')
+				self.get_instruction(n-1, instr, 'left')
+				self.get_instruction(n-1, instr, 'down')
+				self.get_instruction(n-1, instr, 'right')
+				self.get_instruction(n-1, instr, 'down')
+	
+	def draw_minkowski(self, x, y, depth, short_line_len=3):
+		instr = []
+		self.get_instruction(depth, instr, 'right')
 
-
-
-
-
-	def draw_pattern(self, y, x1, x2, depth):
-		# if depth<=0:
-		# 	return
-		# else:
-		# 	depth-=1
-		# 	self.draw_pattern(y, x1//4, x2//4, depth)
-
-		# Horizontal
-		# R - x (y) to x+1b (y)
-		# U - (x+1b) y to (x+1b) y+1b
-		# R - x+1b (y+1b) to x+2b (y+1b)
-		# D - (x+2b) y+1b to (x+2b) y
-		# D - (x+2b) y to (x+2b) y-1b
-		# R - x+2b (y-1b) to x+3b (y-1b)
-		# U - (x+3b) y-1b to (x+3b) y
-		# R - x+3b (y) to x+4b (y)
-		b = (x2-x1)//4
-
-		self.horizontal_line(y, x1, x1+b, depth-1)
-		self.vertical_line(x1+b, y, y+b)
-		self.horizontal_line(y+b, x1+b, x1+b*2)
-		self.vertical_line(x1+b*2, y+b, y)
-		self.vertical_line(x1+b*2, y, y-1*b)
-		self.horizontal_line(y-1*b, x1+2*b, x1+3*b)
-		self.vertical_line(x1+3*b, y-b, y)
-		self.horizontal_line(y, x1+3*b, x1+4*b)
-
-		# Vertical
-		# U - (x) y to y+1b
-		# L - x (y+1b) to x-1b
-		# U - (x-1b) y+1b to y+2b
-		# R - x-1b (y+2b) to x 
-		# R - x (y+2b) to x+b
-		# U - (x+b) y+2b to y+3b
-		# L -  x+b (y+3b) to x
-		# U - (x) y+3b to y+4b 
-		self.vertical_line(x1, y, y+b)
-		self.horizontal_line(y+b, x1, x1-b)
-		self.vertical_line(x1-b, y+b, y+b*2)
-		self.horizontal_line(y+b*2, x1-b, x1)
-		self.horizontal_line(y+b*2, x1, x1+b)
-		self.vertical_line(x1+b, y+2*b, y+3*b)
-		self.horizontal_line(y+3*b, x1+b, x1)
-		self.vertical_line(x1, y+3*b, y+4*b)
+		for i in instr:
+			if(i=='left'):
+				self.horizontal_line(y, x, x:=x-short_line_len)
+			if(i=='right'):
+				self.horizontal_line(y, x, x:=x+short_line_len)
+			elif(i=='down'):
+				self.vertical_line(x, y, y:=y-short_line_len)
+			elif(i=='up'):
+				self.vertical_line(x, y, y:=y+short_line_len)
 
 	def generate_image(self, f_name):
 		with open(f_name, "wb") as file: # wb - write in binary mode
@@ -160,6 +141,6 @@ class BMP:
 		print("BMP file created")
 
 if __name__ == '__main__':
-	image = BMP(500, 800)
-	image.draw_pattern(250, 20, 780, 3)  # Starting point and size
+	image = BMP(3000, 3000)
+	image.draw_minkowski(30, 1000, 3, 30)  # Starting point and size
 	image.generate_image("output.bmp")

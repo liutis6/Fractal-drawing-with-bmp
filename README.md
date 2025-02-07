@@ -18,5 +18,9 @@ Lots of comments as this is all new to me.
 * Testing
 * Benchmarking
 
-## Pattern to replicate:
+## Pattern to replicate (Minkowski Sausage):
 ![pattern](pattern.png "pattern")
+
+## References:
+- Inspiration for the recurrsion function: https://github.com/spirometaxas/minkowski-sausage-cli
+- Definition: https://en.wikipedia.org/wiki/Minkowski_sausage
