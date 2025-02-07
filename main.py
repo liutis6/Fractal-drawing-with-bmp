@@ -2,6 +2,9 @@ class BMP:
 	def __init__(self, height, width):
 		self.height = height
 		self.width = width
+		self.x = 0
+		self.y = 0
+		self.line_len = 0
 
 		self.bmp_header = bytearray([
 		0x42, 0x4D, # 'B', 'M' - bmp file signature
@@ -87,51 +90,54 @@ class BMP:
 				x+=1
 	
 	# i - section in the fractal
-	def get_instruction(self, n, instr, type):
+	def rec_minkowski(self, n, type):
 		if (n<=0):
-			instr.append(type)
+			if(type=='left'):
+				self.horizontal_line(self.y, self.x, self.x-self.line_len)
+				self.x = self.x - self.line_len
+			elif(type=='right'):
+				self.horizontal_line(self.y, self.x, self.x+self.line_len)
+				self.x = self.x + self.line_len
+			elif(type=='down'):
+				self.vertical_line(self.x, self.y, self.y-self.line_len)
+				self.y = self.y - self.line_len
+			elif(type=='up'):
+				self.vertical_line(self.x, self.y, self.y+self.line_len)
+				self.y = self.y + self.line_len
 		else:
 			if(type=='right'):
-				self.get_instruction(n-1, instr, 'right')
-				self.get_instruction(n-1, instr, 'up')
-				self.get_instruction(n-1, instr, 'right')
-				self.get_instruction(n-1, instr, 'down')
-				self.get_instruction(n-1, instr, 'down')
-				self.get_instruction(n-1, instr, 'right')
-				self.get_instruction(n-1, instr, 'up')
-				self.get_instruction(n-1, instr, 'right')
+				self.rec_minkowski(n-1, 'right')
+				self.rec_minkowski(n-1, 'up')
+				self.rec_minkowski(n-1, 'right')
+				self.rec_minkowski(n-1, 'down')
+				self.rec_minkowski(n-1, 'down')
+				self.rec_minkowski(n-1, 'right')
+				self.rec_minkowski(n-1, 'up')
+				self.rec_minkowski(n-1, 'right')
 			elif (type=='up'):
-				self.get_instruction(n-1, instr, 'up')
-				self.get_instruction(n-1, instr, 'left')
-				self.get_instruction(n-1, instr, 'up')
-				self.get_instruction(n-1, instr, 'right')
-				self.get_instruction(n-1, instr, 'right')
-				self.get_instruction(n-1, instr, 'up')
-				self.get_instruction(n-1, instr, 'left')
-				self.get_instruction(n-1, instr, 'up')
+				self.rec_minkowski(n-1, 'up')
+				self.rec_minkowski(n-1, 'left')
+				self.rec_minkowski(n-1, 'up')
+				self.rec_minkowski(n-1, 'right')
+				self.rec_minkowski(n-1, 'right')
+				self.rec_minkowski(n-1, 'up')
+				self.rec_minkowski(n-1, 'left')
+				self.rec_minkowski(n-1, 'up')
 			elif (type=='down'):
-				self.get_instruction(n-1, instr, 'down')
-				self.get_instruction(n-1, instr, 'right')
-				self.get_instruction(n-1, instr, 'down')
-				self.get_instruction(n-1, instr, 'left')
-				self.get_instruction(n-1, instr, 'left')
-				self.get_instruction(n-1, instr, 'down')
-				self.get_instruction(n-1, instr, 'right')
-				self.get_instruction(n-1, instr, 'down')
+				self.rec_minkowski(n-1, 'down')
+				self.rec_minkowski(n-1, 'right')
+				self.rec_minkowski(n-1, 'down')
+				self.rec_minkowski(n-1, 'left')
+				self.rec_minkowski(n-1, 'left')
+				self.rec_minkowski(n-1, 'down')
+				self.rec_minkowski(n-1, 'right')
+				self.rec_minkowski(n-1, 'down')
 	
-	def draw_minkowski(self, x, y, depth, short_line_len=3):
-		instr = []
-		self.get_instruction(depth, instr, 'right')
-
-		for i in instr:
-			if(i=='left'):
-				self.horizontal_line(y, x, x:=x-short_line_len)
-			if(i=='right'):
-				self.horizontal_line(y, x, x:=x+short_line_len)
-			elif(i=='down'):
-				self.vertical_line(x, y, y:=y-short_line_len)
-			elif(i=='up'):
-				self.vertical_line(x, y, y:=y+short_line_len)
+	def draw_minkowski(self, x, y, depth, line_len=3):
+		self.line_len = line_len
+		self.x = x
+		self.y = y
+		self.rec_minkowski(depth, 'right')
 
 	def generate_image(self, f_name):
 		with open(f_name, "wb") as file: # wb - write in binary mode
@@ -141,6 +147,6 @@ class BMP:
 		print("BMP file created")
 
 if __name__ == '__main__':
-	image = BMP(3000, 3000)
-	image.draw_minkowski(30, 1000, 3, 30)  # Starting point and size
+	image = BMP(3000, 8000)
+	image.draw_minkowski(30, 1000, 5, 5)  # Starting point and size
 	image.generate_image("output.bmp")
