@@ -35,16 +35,18 @@ class BMP:
             255, 255, 255, 0  # White
         ])
 
+		bytes_per_row = (self.width + 7) // 8 # +7 pushes amount to next whole number that is (int) divided by 8
+		
 		# bmp requires that each row of pixel data (width x bytes per pixel)
 		# must have a total size that is divisible by 4.
 		# if it is not, extra padding bytes (0x00) must be added at the end of each row
-		self.row_padding = (4-((width+7)//8)%4)%4
+		self.row_padding = (4-(bytes_per_row%4))%4
 			# width*3 - each pixel is 3 bytes, thus a row has width*3 bytes
 			# (width*3 % 4) - finds remainder
 			# 4-(width*3 % 4) - how many bytes are needed as filler in each row
 			# 4-(width*3 % 4) %4 - in case no padding is needed
 			
-		self.row_size = (width+7)//8 + self.row_padding
+		self.row_size = bytes_per_row + self.row_padding
 
 		image_size = height * self.row_size # height amount of rows
 		file_size = 62 + image_size # sum of BMP(14 bytes) and DIB (40 bytes) headers
@@ -75,40 +77,38 @@ class BMP:
 	def horizontal_line(self, y, x1, x2):
 		for x in (range(x1, x2) if x1 < x2 else range(x2, x1)):
 			self.set_pixel(x, y)
-
-	# # draw diagonal line
-	# def diagonal_line(self, x_start):
-	# 	if(x_start>=0):
-	# 		x = x_start
-	# 		for y in range(self.height-x_start):
-	# 			pixel_offset = (y*self.row_size + x*3)
-	# 			self.pixel_data[pixel_offset:pixel_offset+3] = bytearray([0, 0, 255])
-	# 			x+=1
-	# 	else:
-	# 		x = 0
-	# 		for y in range(abs(x_start), self.height): # first pixel will be at y=abs(x), stop when it reaches the top
-	# 			pixel_offset = (y*self.row_size + x*3)
-	# 			self.pixel_data[pixel_offset:pixel_offset+3] = bytearray([0, 0, 255])
-	# 			x+=1
 	
 	# type - section in the fractal
 	def rec_minkowski(self, n, type):
 		if (n<=0):
 			match type:
 				case 'left':
+					#print('left')
 					self.horizontal_line(self.y, self.x, self.x-self.line_len)
 					self.x = self.x - self.line_len
 				case 'right':
-					self.horizontal_line(self.y, self.x, self.x+self.line_len)
+					#print('right')
+					self.horizontal_line(self.y, self.x, self.x+self.line_len+1)
 					self.x = self.x + self.line_len
 				case 'down':
+					#print('down')
+					self.vertical_line(self.x, self.y, self.y+self.line_len+1)
+					self.y = self.y + self.line_len
+				case'up':
+					#print('up')
 					self.vertical_line(self.x, self.y, self.y-self.line_len)
 					self.y = self.y - self.line_len
-				case'up':
-					self.vertical_line(self.x, self.y, self.y+self.line_len)
-					self.y = self.y + self.line_len
 		else:
 			match type:
+				case 'left':
+					self.rec_minkowski(n-1, 'left')
+					self.rec_minkowski(n-1, 'down')
+					self.rec_minkowski(n-1, 'left')
+					self.rec_minkowski(n-1, 'up')
+					self.rec_minkowski(n-1, 'up')
+					self.rec_minkowski(n-1, 'left')
+					self.rec_minkowski(n-1, 'down')
+					self.rec_minkowski(n-1, 'left')
 				case 'right':
 					self.rec_minkowski(n-1, 'right')
 					self.rec_minkowski(n-1, 'up')
@@ -152,6 +152,6 @@ class BMP:
 		print("BMP file created")
 
 if __name__ == '__main__':
-	image = BMP(2000, 2000)
-	image.draw_minkowski(1000, 1500, 2, 5)  # Starting point and size
+	image = BMP(20000, 20000)
+	image.draw_minkowski(10, 10000, 6, 3)  # Starting point and size
 	image.generate_image("output.bmp")
