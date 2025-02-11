@@ -5,6 +5,7 @@ class BMP:
 		self.x = 0
 		self.y = 0
 		self.line_len = 0
+		self.count = 0
 
 		self.bmp_header = bytearray([
 		0x42, 0x4D, # 'B', 'M' - bmp file signature
@@ -80,6 +81,7 @@ class BMP:
 	
 	# type - section in the fractal
 	def rec_minkowski(self, n, type):
+		self.count += 1
 		if (n<=0):
 			match type:
 				case 'left':
@@ -142,6 +144,7 @@ class BMP:
 		self.x = x
 		self.y = y
 		self.rec_minkowski(depth, 'right')
+		print("Operations: ", self.count)
 
 	def generate_image(self, f_name):
 		with open(f_name, "wb") as file: # wb - write in binary mode
@@ -152,6 +155,9 @@ class BMP:
 		print("BMP file created")
 
 if __name__ == '__main__':
-	image = BMP(20000, 20000)
-	image.draw_minkowski(10, 10000, 6, 3)  # Starting point and size
+	depth = 5
+	line_len = 3
+	size = ((4**depth)*line_len)
+	image = BMP(size, size)
+	image.draw_minkowski(0, size//2, depth, line_len)  # Starting point and size
 	image.generate_image("output.bmp")
