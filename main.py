@@ -173,7 +173,7 @@ def run_depth(depths):
 		start = time.perf_counter()
 		image = BMP(size, size)
 		c.append(image.draw_minkowski(d, line_len))
-		image.generate_image(f"outputD{d}.bmp")
+		image.generate_image(f"output/outputD{d}.bmp")
 		end = time.perf_counter()
 		t.append(end-start)
 		image = None # clear to not hog memory
@@ -188,7 +188,7 @@ def run_width(widths):
 		image = BMP(w, w)
 		depth = image.calculate_depth()
 		c.append(image.draw_minkowski(depth, line_len))  # Starting point and size
-		image.generate_image(f"outputW{w}.bmp")
+		image.generate_image(f"output/outputW{w}.bmp")
 		end = time.perf_counter()
 		t.append(end-start)
 		image = None
