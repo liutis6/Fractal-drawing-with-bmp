@@ -1,11 +1,11 @@
 from matplotlib import pyplot as plt
-import gc
-import time
+import gc, time, math
 
 class BMP:
 	def __init__(self, height, width):
 		self.height = height
 		self.width = width
+		self.true_size = width
 		self.x = 0
 		self.y = 0
 		self.line_len = 0
@@ -73,88 +73,150 @@ class BMP:
 				# the use bitwise OR assign to apply it
 
 	# draw vertical line
-	def vertical_line(self, x, y1, y2):
-		for y in (range(y1, y2) if y1 < y2 else range(y2, y1)):
+	def vertical_line(self, x, y):
+		for y in (range(y[0], y[1]+1) if y[0] < y[1] else range(y[1], y[0]+1)):
 			self.set_pixel(x, y)
 
 	# draw horizontal line
-	def horizontal_line(self, y, x1, x2):
-		for x in (range(x1, x2) if x1 < x2 else range(x2, x1)):
+	def horizontal_line(self, x, y):
+		for x in (range(x[0], x[1]) if x[0] < x[1] else range(x[1], x[0])):
 			self.set_pixel(x, y)
 	
-	# type - section in the fractal
-	def rec_minkowski(self, n, type):
-		self.count += 1
-		if (self.x>=self.width):
-			return
-		elif (n<=0): # when max depth is reached start drawing
-			match type:
-				case 'left':
-					#print('left')
-					self.horizontal_line(self.y, self.x, self.x-self.line_len)
-					self.x = self.x - self.line_len # save last position to use later
-				case 'right':
-					#print('right')
-					self.horizontal_line(self.y, self.x, self.x+self.line_len+1)
-					self.x = self.x + self.line_len
-				case 'down':
-					#print('down')
-					self.vertical_line(self.x, self.y, self.y+self.line_len+1)
-					self.y = self.y + self.line_len
-				case'up':
-					#print('up')
-					self.vertical_line(self.x, self.y, self.y-self.line_len)
-					self.y = self.y - self.line_len
+	def draw_line(self, x, y):
+		if x[0] != x[1]:
+			self.horizontal_line(x, y[0])
 		else:
-			match type:
-				case 'left':
-					self.rec_minkowski(n-1, 'left')
-					self.rec_minkowski(n-1, 'down')
-					self.rec_minkowski(n-1, 'left')
-					self.rec_minkowski(n-1, 'up')
-					self.rec_minkowski(n-1, 'up')
-					self.rec_minkowski(n-1, 'left')
-					self.rec_minkowski(n-1, 'down')
-					self.rec_minkowski(n-1, 'left')
-				case 'right':
-					self.rec_minkowski(n-1, 'right')
-					self.rec_minkowski(n-1, 'up')
-					self.rec_minkowski(n-1, 'right')
-					self.rec_minkowski(n-1, 'down')
-					self.rec_minkowski(n-1, 'down')
-					self.rec_minkowski(n-1, 'right')
-					self.rec_minkowski(n-1, 'up')
-					self.rec_minkowski(n-1, 'right')
-				case 'up':
-					self.rec_minkowski(n-1, 'up')
-					self.rec_minkowski(n-1, 'left')
-					self.rec_minkowski(n-1, 'up')
-					self.rec_minkowski(n-1, 'right')
-					self.rec_minkowski(n-1, 'right')
-					self.rec_minkowski(n-1, 'up')
-					self.rec_minkowski(n-1, 'left')
-					self.rec_minkowski(n-1, 'up')
-				case 'down':
-					self.rec_minkowski(n-1, 'down')
-					self.rec_minkowski(n-1, 'right')
-					self.rec_minkowski(n-1, 'down')
-					self.rec_minkowski(n-1, 'left')
-					self.rec_minkowski(n-1, 'left')
-					self.rec_minkowski(n-1, 'down')
-					self.rec_minkowski(n-1, 'right')
-					self.rec_minkowski(n-1, 'down')
+			self.vertical_line(x[0], y)
 	
-	def draw_minkowski(self, depth, line_len=3): # minimum 3 because at 
+	# # type - section in the fractal
+	# def rec_minkowski(self, n, type):
+	# 	self.count += 1
+	# 	if (self.x>=self.width):
+	# 		return
+	# 	elif (n<=0): # when max depth is reached start drawing
+	# 		match type:
+	# 			case 'left':
+	# 				#print('left')
+	# 				self.horizontal_line(self.y, self.x, self.x-self.line_len)
+	# 				self.x = self.x - self.line_len # save last position to use later
+	# 			case 'right':
+	# 				#print('right')
+	# 				self.horizontal_line(self.y, self.x, self.x+self.line_len+1)
+	# 				self.x = self.x + self.line_len
+	# 			case 'down':
+	# 				#print('down')
+	# 				self.vertical_line(self.x, self.y, self.y+self.line_len+1)
+	# 				self.y = self.y + self.line_len
+	# 			case'up':
+	# 				#print('up')
+	# 				self.vertical_line(self.x, self.y, self.y-self.line_len)
+	# 				self.y = self.y - self.line_len
+	# 	else:
+	# 		match type:
+	# 			case 'left':
+	# 				self.rec_minkowski(n-1, 'left')
+	# 				self.rec_minkowski(n-1, 'down')
+	# 				self.rec_minkowski(n-1, 'left')
+	# 				self.rec_minkowski(n-1, 'up')
+	# 				self.rec_minkowski(n-1, 'up')
+	# 				self.rec_minkowski(n-1, 'left')
+	# 				self.rec_minkowski(n-1, 'down')
+	# 				self.rec_minkowski(n-1, 'left')
+	# 			case 'right':
+	# 				self.rec_minkowski(n-1, 'right')
+	# 				self.rec_minkowski(n-1, 'up')
+	# 				self.rec_minkowski(n-1, 'right')
+	# 				self.rec_minkowski(n-1, 'down')
+	# 				self.rec_minkowski(n-1, 'down')
+	# 				self.rec_minkowski(n-1, 'right')
+	# 				self.rec_minkowski(n-1, 'up')
+	# 				self.rec_minkowski(n-1, 'right')
+	# 			case 'up':
+	# 				self.rec_minkowski(n-1, 'up')
+	# 				self.rec_minkowski(n-1, 'left')
+	# 				self.rec_minkowski(n-1, 'up')
+	# 				self.rec_minkowski(n-1, 'right')
+	# 				self.rec_minkowski(n-1, 'right')
+	# 				self.rec_minkowski(n-1, 'up')
+	# 				self.rec_minkowski(n-1, 'left')
+	# 				self.rec_minkowski(n-1, 'up')
+	# 			case 'down':
+	# 				self.rec_minkowski(n-1, 'down')
+	# 				self.rec_minkowski(n-1, 'right')
+	# 				self.rec_minkowski(n-1, 'down')
+	# 				self.rec_minkowski(n-1, 'left')
+	# 				self.rec_minkowski(n-1, 'left')
+	# 				self.rec_minkowski(n-1, 'down')
+	# 				self.rec_minkowski(n-1, 'right')
+	# 				self.rec_minkowski(n-1, 'down')
+	
+	def rec_minkowski2(self, x, y, n):
+		self.count += 2
+		fullx = x[1]-x[0]
+		fully = y[0]-y[1]
+
+		self.count += 2
+		if x[0]>=self.width:
+			return
+		elif n==0:
+			self.count += 1
+			self.draw_line(x, y)
+			return
+		else:
+			self.count += 16
+
+			quarterx = fullx//4
+			quartery = fully//4
+			Ax = x[0]+quarterx
+			Ay = y[0]-quartery
+			Mx = x[0]+quarterx*2
+			My = y[0]-quartery*2
+			Fx = x[1]-quarterx
+			Fy = y[1]+quartery
+			Bx = Ax-quartery
+			By = Ay-quarterx
+			Cx = Mx-quartery
+			Cy = My-quarterx
+			Dx = Mx+quartery
+			Dy = My+quarterx
+			Ex = Fx+quartery
+			Ey = Fy+quarterx
+			
+			#print(f'(d={n}) to  A')
+			self.rec_minkowski2((x[0], Ax), (y[0], Ay), n-1)
+			#print(f'(d={n}) to  B')
+			self.rec_minkowski2((Ax, Bx), 	(Ay, By), 	n-1)
+			#print(f'(d={n}) to  C')
+			self.rec_minkowski2((Bx, Cx), 	(By, Cy), 	n-1)
+			#print(f'(d={n}) to  M')
+			self.rec_minkowski2((Cx, Mx), 	(Cy, My), 	n-1)
+			#print(f'(d={n}) to  D')
+			self.rec_minkowski2((Mx, Dx), 	(My, Dy), 	n-1)
+			#print(f'(d={n}) to  E')
+			self.rec_minkowski2((Dx, Ex), 	(Dy, Ey), 	n-1)
+			#print(f'(d={n}) to  F')
+			self.rec_minkowski2((Ex, Fx), 	(Ey, Fy), 	n-1)
+			#print(f'(d={n}) to  last')
+			self.rec_minkowski2((Fx, x[1]), (Fy, y[1]), n-1)
+
+	# def draw_minkowski(self, depth, line_len=3): # minimum 3 because at 
+	# 	self.line_len = line_len
+	# 	self.x = 0
+	# 	self.y = self.height//2
+	# 	self.rec_minkowski(depth, 'right') # first call to recursion function
+	# 	return self.count
+
+	def draw_minkowski2(self, depth, line_len=3): # minimum 3 because at 
 		self.line_len = line_len
-		self.x = 0
-		self.y = self.height//2
-		self.rec_minkowski(depth, 'right') # first call to recursion function
+		y = self.height//2
+		self.rec_minkowski2((0, self.true_size), (y, y), depth) # first call to recursion function
 		return self.count
 
 	def calculate_depth(self):
 		for n in range(1, 8): # 7 max depth as a precaution as any depth >7 breaches 20k pixel dimensions
 			size = ((4**n)*line_len)
 			if size>self.width:
+				self.true_size = size
 				return n
 
 	def generate_image(self, f_name):
@@ -172,7 +234,8 @@ def run_depth(depths):
 		size = ((4**d)*line_len)
 		start = time.perf_counter()
 		image = BMP(size, size)
-		c.append(image.draw_minkowski(d, line_len))
+		#image.horizontal_line((0, 10), 1)
+		c.append(image.draw_minkowski2(d, line_len))
 		image.generate_image(f"output/outputD{d}.bmp")
 		end = time.perf_counter()
 		t.append(end-start)
@@ -187,7 +250,7 @@ def run_width(widths):
 		start = time.perf_counter()
 		image = BMP(w, w)
 		depth = image.calculate_depth()
-		c.append(image.draw_minkowski(depth, line_len))  # Starting point and size
+		c.append(image.draw_minkowski2(depth, line_len))  # Starting point and size
 		image.generate_image(f"output/outputW{w}.bmp")
 		end = time.perf_counter()
 		t.append(end-start)
@@ -213,7 +276,6 @@ if __name__ == '__main__':
 		ax1.annotate(f'{num:.2e}', (ds[i], cs[i]), xytext=(-6,5), textcoords='offset points')
 	ax1.set_xlabel('Depth')
 	ax1.set_ylabel('Operations')
-	ax1.set_yscale('log')
 
 	# depth x time
 	ax3.plot(ds, ts, '-o')
@@ -223,10 +285,8 @@ if __name__ == '__main__':
 		ax3.annotate(f'{num:.2e}', (ds[i], ts[i]), xytext=(-10,5), textcoords='offset points')
 	ax3.set_xlabel('Depth')
 	ax3.set_ylabel('Time')
-	ax3.set_yscale('log')
 
 	ws = [5000, 10000, 15000, 20000]
-
 	# width x ops
 	cs, ts = run_width(ws)
 	ax2.plot(ws, cs, '-o')
@@ -236,7 +296,6 @@ if __name__ == '__main__':
 		ax2.annotate(f'{num:.2e}', (ws[i], cs[i]), xytext=(-10,5), textcoords='offset points')
 	ax2.set_xlabel('Width')
 	ax2.set_ylabel('Operations')
-	ax2.set_yscale('log')
 
 	# width x time
 	ax4.plot(ws, ts, '-o')
@@ -246,7 +305,6 @@ if __name__ == '__main__':
 		ax4.annotate(f'{num:.2e}', (ws[i], ts[i]), xytext=(-10,5), textcoords='offset points')
 	ax4.set_xlabel('Width')
 	ax4.set_ylabel('Time')
-	ax4.set_yscale('log')
 
 	plt.tight_layout()
 	plt.show()
