@@ -1,20 +1,20 @@
 # Description:
-Python program for creating an image of a recursive pattern displayed using a BMP file.
-Two use cases:
+- Python program for creating an image of a recursive pattern displayed using a BMP file.
+- Two use cases:
     1. a depth is given - the program resizes the image to fit the fractal.
-    2. a pixel width is given - fractal stop drawing as soon as it reaches the specified width.
+    2. a pixel width is given - the program stops drawing the fractal as soon as it reaches the specified width.
 
 # Instructions:
 * Change values:
-    * ds - list of depths to generate
-    * ws - list of widths to generate
-    * line_len - (pixel) length of the drawn lines
+    * ds - list of desired depth values to generate the fractals with,
+    * ws - same as ds, but for desired widths,
+    * line_len - (pixel) length of the drawn lines.
 * Run "main.py"
 
 # File structure:
-* main.py - the entire program
-* output - gotten result
-* images - images for showcasing in readme
+* "main.py" - the entire program
+* "output" - gotten result
+* "images" - images for showcasing in readme
 
 # Todo : 
 * ~~BMP file printing template~~
