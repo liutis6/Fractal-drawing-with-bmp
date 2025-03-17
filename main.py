@@ -150,7 +150,7 @@ class BMP:
 	# 				self.rec_minkowski(n-1, 'right')
 	# 				self.rec_minkowski(n-1, 'down')
 	
-	def rec_minkowski2(self, x, y, n):
+	def rec_minkowski_depth(self, x, y, n):
 		self.count += 2
 		fullx = x[1]-x[0]
 		fully = y[0]-y[1]
@@ -182,23 +182,75 @@ class BMP:
 			Ex = Fx+quartery
 			Ey = Fy+quarterx
 			
-			#print(f'(d={n}) to  A')
-			self.rec_minkowski2((x[0], Ax), (y[0], Ay), n-1)
-			#print(f'(d={n}) to  B')
-			self.rec_minkowski2((Ax, Bx), 	(Ay, By), 	n-1)
-			#print(f'(d={n}) to  C')
-			self.rec_minkowski2((Bx, Cx), 	(By, Cy), 	n-1)
-			#print(f'(d={n}) to  M')
-			self.rec_minkowski2((Cx, Mx), 	(Cy, My), 	n-1)
-			#print(f'(d={n}) to  D')
-			self.rec_minkowski2((Mx, Dx), 	(My, Dy), 	n-1)
-			#print(f'(d={n}) to  E')
-			self.rec_minkowski2((Dx, Ex), 	(Dy, Ey), 	n-1)
-			#print(f'(d={n}) to  F')
-			self.rec_minkowski2((Ex, Fx), 	(Ey, Fy), 	n-1)
-			#print(f'(d={n}) to  last')
-			self.rec_minkowski2((Fx, x[1]), (Fy, y[1]), n-1)
+			print(f'(d={n}) to  A')
+			self.rec_minkowski_depth((x[0], Ax), (y[0], Ay), n-1)
+			print(f'(d={n}) to  B')
+			self.rec_minkowski_depth((Ax, Bx), 	(Ay, By), 	n-1)
+			print(f'(d={n}) to  C')
+			self.rec_minkowski_depth((Bx, Cx), 	(By, Cy), 	n-1)
+			print(f'(d={n}) to  M')
+			self.rec_minkowski_depth((Cx, Mx), 	(Cy, My), 	n-1)
+			print(f'(d={n}) to  D')
+			self.rec_minkowski_depth((Mx, Dx), 	(My, Dy), 	n-1)
+			print(f'(d={n}) to  E')
+			self.rec_minkowski_depth((Dx, Ex), 	(Dy, Ey), 	n-1)
+			print(f'(d={n}) to  F')
+			self.rec_minkowski_depth((Ex, Fx), 	(Ey, Fy), 	n-1)
+			print(f'(d={n}) to  last')
+			self.rec_minkowski_depth((Fx, x[1]), (Fy, y[1]), n-1)
 
+	def rec_minkowski_dim(self, x, y):
+		# lengthx = lengthx//4
+		# lengthy = lengthy//4
+		lengthx = (x[1]-x[0])//4
+		lengthy = (y[0]-y[1])//4
+
+		self.count += 2
+		#print(f"lx = {lengthx}; ly = {lengthy}")
+		if ((((-1*self.line_len)<=lengthx<=self.line_len) and x[1]!=x[0]) or
+			((-1*self.line_len)<=lengthy<=self.line_len and y[0]!=y[1])):
+			self.count += 1
+			self.draw_line(x, y)
+			return
+		else:
+			# lengthx = (x[1]-x[0])//4
+			# lengthy = (y[0]-y[1])//4
+
+			quarterx = lengthx
+			quartery = lengthy
+			Ax = x[0]+quarterx
+			Ay = y[0]-quartery
+			Mx = x[0]+quarterx*2
+			My = y[0]-quartery*2
+			Fx = x[1]-quarterx
+			Fy = y[1]+quartery
+			Bx = Ax-quartery
+			By = Ay-quarterx
+			Cx = Mx-quartery
+			Cy = My-quarterx
+			Dx = Mx+quartery
+			Dy = My+quarterx
+			Ex = Fx+quartery
+			Ey = Fy+quarterx
+			
+			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  A')
+			self.rec_minkowski_dim((x[0], Ax), (y[0], Ay))
+			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  B')
+			self.rec_minkowski_dim((Ax, Bx), 	(Ay, By))
+			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  C')
+			self.rec_minkowski_dim((Bx, Cx), 	(By, Cy))
+			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  M')
+			self.rec_minkowski_dim((Cx, Mx), 	(Cy, My))
+			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  D')
+			self.rec_minkowski_dim((Mx, Dx), 	(My, Dy))
+			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  E')
+			self.rec_minkowski_dim((Dx, Ex), 	(Dy, Ey))
+			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  F')
+			self.rec_minkowski_dim((Ex, Fx), 	(Ey, Fy))
+			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  last')
+			self.rec_minkowski_dim((Fx, x[1]), (Fy, y[1]))
+
+		
 	# def draw_minkowski(self, depth, line_len=3): # minimum 3 because at 
 	# 	self.line_len = line_len
 	# 	self.x = 0
@@ -206,12 +258,18 @@ class BMP:
 	# 	self.rec_minkowski(depth, 'right') # first call to recursion function
 	# 	return self.count
 
-	def draw_minkowski2(self, depth, line_len=3): # minimum 3 because at 
+	def draw_minkowski_depth(self, depth, line_len=3): # minimum 3 because at 
 		self.line_len = line_len
 		y = self.height//2
-		self.rec_minkowski2((0, self.true_size), (y, y), depth) # first call to recursion function
+		self.rec_minkowski_depth((0, self.true_size), (y, y), depth) # first call to recursion function
 		return self.count
-
+	
+	def draw_minkowski_dim(self, width, line_len=3):
+		self.line_len = line_len
+		y = self.height//2
+		self.rec_minkowski_dim((0, width), (y,y))
+		return self.count
+	
 	def calculate_depth(self):
 		for n in range(1, 8): # 7 max depth as a precaution as any depth >7 breaches 20k pixel dimensions
 			size = ((4**n)*line_len)
@@ -235,7 +293,7 @@ def run_depth(depths):
 		start = time.perf_counter()
 		image = BMP(size, size)
 		#image.horizontal_line((0, 10), 1)
-		c.append(image.draw_minkowski2(d, line_len))
+		c.append(image.draw_minkowski_depth(d, line_len))
 		image.generate_image(f"output/outputD{d}.bmp")
 		end = time.perf_counter()
 		t.append(end-start)
@@ -249,8 +307,7 @@ def run_width(widths):
 	for w in widths:
 		start = time.perf_counter()
 		image = BMP(w, w)
-		depth = image.calculate_depth()
-		c.append(image.draw_minkowski2(depth, line_len))  # Starting point and size
+		c.append(image.draw_minkowski_dim(w, line_len))  # Starting point and size
 		image.generate_image(f"output/outputW{w}.bmp")
 		end = time.perf_counter()
 		t.append(end-start)
@@ -265,7 +322,7 @@ if __name__ == '__main__':
 	ax1, ax2, ax3, ax4 = axes.flatten()
 	fig.suptitle("Graphs of Minkowski sausage performance")
 
-	ds = [1, 3, 5, 7]
+	ds = [2]
 
 	# depth x ops
 	cs, ts = run_depth(ds)
@@ -286,7 +343,7 @@ if __name__ == '__main__':
 	ax3.set_xlabel('Depth')
 	ax3.set_ylabel('Time')
 
-	ws = [5000, 10000, 15000, 20000]
+	ws = [101]
 	# width x ops
 	cs, ts = run_width(ws)
 	ax2.plot(ws, cs, '-o')
@@ -306,8 +363,8 @@ if __name__ == '__main__':
 	ax4.set_xlabel('Width')
 	ax4.set_ylabel('Time')
 
-	plt.tight_layout()
-	plt.show()
+	# plt.tight_layout()
+	# plt.show()
 
 	# TODO
 	# make algoritm for making image with given width
