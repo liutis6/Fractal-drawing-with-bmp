@@ -64,6 +64,7 @@ class BMP:
 
 	# change one pixel
 	def set_pixel(self, x, y):
+		self.count+=1
 		if 0 <= x < self.width and 0 <= y < self.height:
 			index = (self.height-1-y) * self.row_size + (x // 8) # find exact byte
 			bit = 7 - (x % 8) # find index of the bit inside of the byte
@@ -75,14 +76,17 @@ class BMP:
 	# draw vertical line
 	def vertical_line(self, x, y):
 		for y in (range(y[0], y[1]+1) if y[0] < y[1] else range(y[1], y[0]+1)):
+			self.count +=1
 			self.set_pixel(x, y)
 
 	# draw horizontal line
 	def horizontal_line(self, x, y):
 		for x in (range(x[0], x[1]) if x[0] < x[1] else range(x[1], x[0])):
+			self.count +=1
 			self.set_pixel(x, y)
 	
 	def draw_line(self, x, y):
+		self.count+=1
 		if x[0] != x[1]:
 			self.horizontal_line(x, y[0])
 		else:
@@ -152,103 +156,103 @@ class BMP:
 	
 	def rec_minkowski_depth(self, x, y, n):
 		self.count += 2
-		fullx = x[1]-x[0]
-		fully = y[0]-y[1]
+		fullx = x[1]-x[0] #C1
+		fully = y[0]-y[1] #C2
 
 		self.count += 2
-		if x[0]>=self.width:
+		if x[0]>=self.width: #C3
 			return
-		elif n==0:
-			self.count += 1
-			self.draw_line(x, y)
+		elif n==0: 			 #C4	
+			self.draw_line(x, y) #N^2
 			return
 		else:
-			self.count += 16
 
-			quarterx = fullx//4
-			quartery = fully//4
-			Ax = x[0]+quarterx
-			Ay = y[0]-quartery
-			Mx = x[0]+quarterx*2
-			My = y[0]-quartery*2
-			Fx = x[1]-quarterx
-			Fy = y[1]+quartery
-			Bx = Ax-quartery
-			By = Ay-quarterx
-			Cx = Mx-quartery
-			Cy = My-quarterx
-			Dx = Mx+quartery
-			Dy = My+quarterx
-			Ex = Fx+quartery
-			Ey = Fy+quarterx
+			# C5 * 16
+			self.count += 16
+			quarterx = fullx//4					
+			quartery = fully//4					
+			Ax = x[0]+quarterx					
+			Ay = y[0]-quartery					
+			Mx = x[0]+quarterx*2			
+			My = y[0]-quartery*2			
+			Fx = x[1]-quarterx			
+			Fy = y[1]+quartery			
+			Bx = Ax-quartery			
+			By = Ay-quarterx			
+			Cx = Mx-quartery			
+			Cy = My-quarterx			
+			Dx = Mx+quartery			
+			Dy = My+quarterx			
+			Ex = Fx+quartery			
+			Ey = Fy+quarterx			
 			
-			print(f'(d={n}) to  A')
+			# T(n-1) * 8
 			self.rec_minkowski_depth((x[0], Ax), (y[0], Ay), n-1)
-			print(f'(d={n}) to  B')
+			self.count+=1
 			self.rec_minkowski_depth((Ax, Bx), 	(Ay, By), 	n-1)
-			print(f'(d={n}) to  C')
+			self.count+=1
 			self.rec_minkowski_depth((Bx, Cx), 	(By, Cy), 	n-1)
-			print(f'(d={n}) to  M')
+			self.count+=1
 			self.rec_minkowski_depth((Cx, Mx), 	(Cy, My), 	n-1)
-			print(f'(d={n}) to  D')
+			self.count+=1
 			self.rec_minkowski_depth((Mx, Dx), 	(My, Dy), 	n-1)
-			print(f'(d={n}) to  E')
+			self.count+=1
 			self.rec_minkowski_depth((Dx, Ex), 	(Dy, Ey), 	n-1)
-			print(f'(d={n}) to  F')
+			self.count+=1
 			self.rec_minkowski_depth((Ex, Fx), 	(Ey, Fy), 	n-1)
-			print(f'(d={n}) to  last')
+			self.count+=1
 			self.rec_minkowski_depth((Fx, x[1]), (Fy, y[1]), n-1)
+			self.count+=1
 
 	def rec_minkowski_dim(self, x, y):
-		# lengthx = lengthx//4
-		# lengthy = lengthy//4
-		lengthx = (x[1]-x[0])//4
-		lengthy = (y[0]-y[1])//4
+		self.count += 2 
+		lengthx = (x[1]-x[0])//4 #C1
+		lengthy = (y[0]-y[1])//4 #C2
 
-		self.count += 2
-		#print(f"lx = {lengthx}; ly = {lengthy}")
+		self.count += 1 # C3
 		if ((((-1*self.line_len)<=lengthx<=self.line_len) and x[1]!=x[0]) or
-			((-1*self.line_len)<=lengthy<=self.line_len and y[0]!=y[1])):
+			((-1*self.line_len)<=lengthy<=self.line_len and y[0]!=y[1])): #C4
 			self.count += 1
-			self.draw_line(x, y)
+			self.draw_line(x, y) # N^2
 			return
 		else:
-			# lengthx = (x[1]-x[0])//4
-			# lengthy = (y[0]-y[1])//4
+			# C5 * 16
+			self.count+=16
+			quarterx = lengthx	
+			quartery = lengthy	
+			Ax = x[0]+quarterx	
+			Ay = y[0]-quartery	
+			Mx = x[0]+quarterx*2	
+			My = y[0]-quartery*2	
+			Fx = x[1]-quarterx	
+			Fy = y[1]+quartery	
+			Bx = Ax-quartery	
+			By = Ay-quarterx	
+			Cx = Mx-quartery	
+			Cy = My-quarterx	
+			Dx = Mx+quartery	
+			Dy = My+quarterx	
+			Ex = Fx+quartery	
+			Ey = Fy+quarterx	
 
-			quarterx = lengthx
-			quartery = lengthy
-			Ax = x[0]+quarterx
-			Ay = y[0]-quartery
-			Mx = x[0]+quarterx*2
-			My = y[0]-quartery*2
-			Fx = x[1]-quarterx
-			Fy = y[1]+quartery
-			Bx = Ax-quartery
-			By = Ay-quarterx
-			Cx = Mx-quartery
-			Cy = My-quarterx
-			Dx = Mx+quartery
-			Dy = My+quarterx
-			Ex = Fx+quartery
-			Ey = Fy+quarterx
-			
-			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  A')
+			# T(n-1) * 8
+			self.count+=1
 			self.rec_minkowski_dim((x[0], Ax), (y[0], Ay))
-			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  B')
+			self.count+=1
 			self.rec_minkowski_dim((Ax, Bx), 	(Ay, By))
-			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  C')
+			self.count+=1
 			self.rec_minkowski_dim((Bx, Cx), 	(By, Cy))
-			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  M')
+			self.count+=1
 			self.rec_minkowski_dim((Cx, Mx), 	(Cy, My))
-			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  D')
+			self.count+=1
 			self.rec_minkowski_dim((Mx, Dx), 	(My, Dy))
-			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  E')
+			self.count+=1
 			self.rec_minkowski_dim((Dx, Ex), 	(Dy, Ey))
-			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  F')
+			self.count+=1
 			self.rec_minkowski_dim((Ex, Fx), 	(Ey, Fy))
-			print(f'(lengthx={lengthx}, lengthy = {lengthy}) to  last')
+			self.count+=1
 			self.rec_minkowski_dim((Fx, x[1]), (Fy, y[1]))
+			self.count+=1
 
 		
 	# def draw_minkowski(self, depth, line_len=3): # minimum 3 because at 
@@ -322,7 +326,7 @@ if __name__ == '__main__':
 	ax1, ax2, ax3, ax4 = axes.flatten()
 	fig.suptitle("Graphs of Minkowski sausage performance")
 
-	ds = [2]
+	ds = [x for x in range(1, 8)]
 
 	# depth x ops
 	cs, ts = run_depth(ds)
@@ -343,7 +347,7 @@ if __name__ == '__main__':
 	ax3.set_xlabel('Depth')
 	ax3.set_ylabel('Time')
 
-	ws = [101]
+	ws = [x for x in range(2000, 20001, 2000)]
 	# width x ops
 	cs, ts = run_width(ws)
 	ax2.plot(ws, cs, '-o')
@@ -363,8 +367,8 @@ if __name__ == '__main__':
 	ax4.set_xlabel('Width')
 	ax4.set_ylabel('Time')
 
-	# plt.tight_layout()
-	# plt.show()
+	plt.tight_layout()
+	plt.show()
 
 	# TODO
 	# make algoritm for making image with given width
